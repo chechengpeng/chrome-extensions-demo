@@ -1,1 +1,3 @@
-# extensions-sites-statistics-self
+## 你经常浏览的网址记录
+ 想把自己每天上网打开的网址做一下统计
+
