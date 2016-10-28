@@ -1,13 +1,12 @@
 {
     "manifest_version": 2,
 
-    "name": "Do Not indulge in some sites",
+    "name": "Sites statistics",
     "description": "This extension show how many times you indulge in some useless sites in your work",
     "version": "1.0",
 
     "browser_action": {
-        "default_icon": "icon.png",
-        "default_popup": "popup.html"
+        "default_icon": "icon.png"
     },
     "background": {
         "scripts": ["eventPage.js"],
