@@ -1,0 +1,41 @@
+body {
+    font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
+    font-size: 100%;
+    width: 1000px;
+    margin: 10px auto;
+}
+ul,ol{
+    margin: 0;
+    padding: 0;
+}
+ol{
+    height: 32px;
+    line-height: 32px;
+    width: 100%;
+    padding: 0 5px;
+}
+ol:nth-child(even){
+    background-color: #cccccc;
+}
+.title{
+    display: inline-block;
+    width: 460px;
+    text-overflow:ellipsis;
+    margin-right: 50px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.url{
+    display: inline-block;
+    width: 460px;
+    text-overflow:ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+input{
+    margin-left: 10px;
+}
+.input{
+    padding: 10px;
+    border-bottom: 1px solid #cccccc;
+}

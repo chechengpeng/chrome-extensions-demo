@@ -1,0 +1,33 @@
+<!doctype html>
+<!--
+ This page is shown when the extension button is clicked, because the
+ "browser_action" field in manifest.json contains the "default_popup" key with
+ value "popup.html".
+ -->
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Getting Started Extension's Popup</title>
+    <link href="css.css" rel="stylesheet">
+    <!--
+      - JavaScript and HTML must be in separate files: see our Content Security
+      - Policy documentation[1] for details and explanation.
+      -
+      - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
+     -->
+    <script src="history_bookmarks.js"></script>
+  </head>
+  <body>
+    <div class="input">
+      <input type="radio" name="time" checked value="One Week" id="week"><label for="week">One Week</label>
+      <input type="radio" name="time" value="One Month" id="month"><label for="month">Month</label>
+      <input type="radio" name="time" value="Three Month" id="three-month"><label for="three-month">Three Month</label>
+      <input type="radio" name="time" value="Three Month" id="year"><label for="year">Year</label>
+      <input type="radio" name="time" value="Three Month" id="three-year"><label for="three-year">Three Year</label>
+    </div>
+    <div>
+      <ul id="show"></ul>
+    </div>
+  </body>
+</html>
+
