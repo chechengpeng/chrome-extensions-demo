@@ -70,6 +70,7 @@ h2{
     border: 1px solid #eeeeee;
     line-height: 40px;
     margin-left: -1px; /*双边框调整为单边框 */
+    cursor: pointer;
 }
 #page li:first-child{
     border-radius: 5px 0 0 5px;
@@ -79,4 +80,8 @@ h2{
 }
 #page li.active,#page li:hover{
     background-color: #ED5565;
+}
+#page li.disable:hover{
+    background-color: #cccccc;
+    cursor: not-allowed;
 }
