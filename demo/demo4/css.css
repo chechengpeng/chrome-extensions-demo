@@ -5,10 +5,10 @@ form, input, button, option, textarea, select {margin: 0;padding: 0;color:#000; 
 textarea{resize:none;}
 input{ outline:none;}
 input, button, textarea, select {font:100% "微软雅黑","华文细黑",STHeiti-Light,STHeiti,"宋体";}
-a {text-decoration: none; cursor:pointer;color:#b3b7c1; }
+a {text-decoration: none; cursor:pointer; color: black}
 a:link {text-decoration: none;}
 a:visited {text-decoration: none;}
-a:hover {text-decoration: none;  }
+a:hover {text-decoration: underline;  }
 a:active {text-decoration: none;}
 body {
     font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
@@ -58,10 +58,11 @@ h2{
     width: 20px;
 }
 #page{
-    width: 400px;
-    height: 50px;
     margin: 0 auto;
     text-align: center;
+    user-select:none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 #page li{
     display: inline-block;
@@ -70,6 +71,7 @@ h2{
     border: 1px solid #eeeeee;
     line-height: 40px;
     margin-left: -1px; /*双边框调整为单边框 */
+    cursor: pointer;
 }
 #page li:first-child{
     border-radius: 5px 0 0 5px;
@@ -77,6 +79,16 @@ h2{
 #page li:last-child{
     border-radius: 0 5px 5px 0;
 }
-#page li.active,#page li:hover{
-    background-color: #ED5565;
+#page li.only{
+    border-radius:5px;
+}
+#page li:hover{
+    background-color: #03d98e;
+}
+#page li.active{
+    background-color: #ED5565 !important;
+}
+#page li.disable:hover{
+    background-color: #cccccc;
+    cursor: not-allowed;
 }
