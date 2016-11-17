@@ -2,12 +2,17 @@ document.addEventListener('DOMContentLoaded', function () {
   search();
   var urlArr = []; //书签栏所有书签的的url和title
   var arr = []; //历史记录中所有的url和title
-  var neverArr = [];
-  var initPage = 1, last, nums = 20, counts;
+  var neverArr = []; // 书签栏url没有出现在历史记录中的
+  var initPage = 1, last, nums = 25, counts;
   var ele_page;
+  var k;
+  var items = document.getElementsByName('url');
+  var selectAll = document.getElementById('selectAll'); //全选
+  var selectInvert = document.getElementById('selectInvert'); //反选
+  var remove = document.getElementById('remove'); //删除
+  var move = document.getElementById('move'); //删除
   function search() {
     ele_page = document.getElementById('page');
-    console.log('ele:%o', ele_page);
     chrome.history.search({
       text: '',
       startTime: 0,
@@ -17,27 +22,24 @@ document.addEventListener('DOMContentLoaded', function () {
       for (var i = 0; i < historyItemArray.length; i++) {
         arr.push({ url: historyItemArray[i].url, title: historyItemArray[i].title });
       }
-      console.log(arr);
       chrome.bookmarks.getTree(function (bookmarkArray) {
-        console.log(bookmarkArray);
         getAllBookMarksUrl(bookmarkArray);
         // 书签中的url在历史记录里找不到
         for (var i = 0; i < urlArr.length; i++) {
           var j = 0;
           while (j < arr.length) {
-            if (urlArr[i].url == arr[j].url) {
+            if (urlArr[i].url.slice(urlArr[i].url.indexOf(':')) == arr[j].url.slice(arr[j].url.indexOf(':'))) { //解决http变为https
               break;
             } else {
               j++;
             }
           }
+          // 如果遍历完了arr也没找到相等的，就把这条数据添加到数组
           if (j == arr.length) {
             neverArr.push(urlArr[i]);
           }
         }
-        console.log('arr:%o',neverArr);
         counts = neverArr.length;
-        console.log('len:', counts);
         last = Math.ceil(counts / nums);
         changeShow();
         ele_page.addEventListener('click', pageGo); //ele_page 有内容了再添加事件
@@ -46,6 +48,70 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  remove.addEventListener('click', function () {
+    var remArr = [];
+    for(var i in items){
+      if(items.hasOwnProperty(i)){
+        if(items[i].checked){
+          remArr.push(items[i]);
+        }
+      }
+    }
+    if(remArr.length>0){
+      if (confirm("确定删除吗？")) {
+        for(var m=0;m<remArr.length;m++){
+          chrome.bookmarks.remove(remArr[m].id);
+          neverArr.splice(remArr[m].value,1);
+        }
+        changeShow();
+        pageChange();
+      }
+    }
+  });
+
+  move.addEventListener('click', function(){
+    var remArr = [];
+    for(var i in items){
+      if(items.hasOwnProperty(i)){
+        if(items[i].checked){
+          remArr.push(items[i]);
+        }
+      }
+    }
+    if(remArr.length>0){
+      if (confirm("确定移到新文件夹吗？")) {
+        var newBookmark = { parentId:'1',title:'不常用',index:0 };
+        chrome.bookmarks.create(newBookmark,function(result){
+          for(var m=0;m<remArr.length;m++){
+            chrome.bookmarks.move(remArr[m].id,{parentId:result.id,index:0});
+            neverArr.splice(remArr[m].value,1);
+          }
+        });
+        changeShow();
+        pageChange();
+      }
+    }
+  });
+
+  selectAll.addEventListener('click', function () {
+    for(var i in items){
+      if(items.hasOwnProperty(i)){
+        items[i].checked = true;
+      }
+    }
+
+  });
+
+  selectInvert.addEventListener('click', function () {
+    for(var i in items){
+      if(items.hasOwnProperty(i)){
+        items[i].checked = !items[i].checked;
+      }
+    }
+
+  });
+
+
   /**
    * 获取浏览器所有书签的url和title
    * @param arr 子文件数组
@@ -53,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function getAllBookMarksUrl(arr) {
     for (var i = 0; i < arr.length; i++) {
       if (arr[i].url) {
-        urlArr.push({ url: arr[i].url, title: arr[i].title });
+        urlArr.push({ url: arr[i].url, title: arr[i].title, id: arr[i].id });
       }
       if (arr[i].children) {
         getAllBookMarksUrl(arr[i].children);
@@ -66,9 +132,9 @@ document.addEventListener('DOMContentLoaded', function () {
    */
   function pageChange() {
     var text = '';
-    for (var k = 20*(initPage-1); k < 20*initPage; k++) {
-      if(neverArr[k]){
-        text = text + '<li><span class="title"><span class="num">' + (k + 1) + '</span>' + neverArr[k].title + '</span><a class="url" target="_blank" href="'+neverArr[k].url+'">' + neverArr[k].url + '</a></li>';
+    for (k = nums * (initPage - 1); k < nums * initPage; k++) {
+      if (neverArr[k]) {
+        text = text + '<li><span class="title" title="' + neverArr[k].title + '"><input type="checkbox" name="url" id="' + neverArr[k].id + '" value="' + k + '"><span class="num">' + (k + 1) + '.</span>' + neverArr[k].title + '</span><a class="url" target="_blank" href="' + neverArr[k].url + '" title="' + neverArr[k].url + '">' + neverArr[k].url + '</a></li>';
       }
     }
     var actLi = 'li_' + initPage;
@@ -135,7 +201,6 @@ document.addEventListener('DOMContentLoaded', function () {
    * @returns {number}
    */
   function changeShow() {
-    console.log('last:%o', last);
     var pageList = '<li id="pre">&lt;</li><li id="li_1" class="active">1</li>';
     if (last < 6) {
       if (last == 1) {
@@ -177,7 +242,6 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
     pageList = pageList + '<li id="li_' + last + '">' + last + '</li><li id="next">&gt;</li>';
-    console.log(ele_page);
     ele_page.innerHTML = pageList;
   }
 });
