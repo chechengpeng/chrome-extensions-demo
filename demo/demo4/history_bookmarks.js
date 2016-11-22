@@ -78,17 +78,46 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
     }
+    console.log(remArr);
     if(remArr.length>0){
       if (confirm("确定移到新文件夹吗？")) {
-        var newBookmark = { parentId:'1',title:'不常用',index:0 };
-        chrome.bookmarks.create(newBookmark,function(result){
-          for(var m=0;m<remArr.length;m++){
-            chrome.bookmarks.move(remArr[m].id,{parentId:result.id,index:0});
-            neverArr.splice(remArr[m].value,1);
-          }
-        });
-        changeShow();
-        pageChange();
+        var markId = localStorage.newBookmarkId;
+        // 如果存在这个新建文件夹就直接移到此文件夹，否则再新建一个
+        if(markId){
+          // 如果把‘不常用文件夹’删除，但没有清空 localStorage 此处根据id查不到书签,会报错
+          chrome.bookmarks.get(markId,function(result){
+            if(result){
+              for(var m=0;m<remArr.length;m++){
+                chrome.bookmarks.move(remArr[m].id,{parentId:markId,index:0});
+                neverArr.splice(remArr[m].value,1);
+              }
+              changeShow();
+              pageChange();
+            }else{
+              var newBookmark = { parentId:'1',title:'不常用',index:0 };
+              chrome.bookmarks.create(newBookmark,function(result){
+                localStorage.newBookmarkId = result.id;
+                for(var m=0;m<remArr.length;m++){
+                  chrome.bookmarks.move(remArr[m].id,{parentId:result.id,index:0});
+                  neverArr.splice(remArr[m].value,1);
+                }
+                changeShow();
+                pageChange();
+              });
+            }
+          });
+        }else {
+          var newBookmark = { parentId:'1',title:'不常用',index:0 };
+          chrome.bookmarks.create(newBookmark,function(result){
+            localStorage.newBookmarkId = result.id;
+            for(var m=0;m<remArr.length;m++){
+              chrome.bookmarks.move(remArr[m].id,{parentId:result.id,index:0});
+              neverArr.splice(remArr[m].value,1);
+            }
+            changeShow();
+            pageChange();
+          });
+        }
       }
     }
   });
