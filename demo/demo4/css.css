@@ -35,7 +35,7 @@ h2{
 }
 .title{
     display: inline-block;
-    width: 460px;
+    width: 560px;
     text-overflow:ellipsis;
     margin-right: 50px;
     overflow: hidden;
@@ -44,9 +44,9 @@ h2{
 #show{
     margin-bottom: 10px;
 }
-.url{
+.pos{
     display: inline-block;
-    width: 460px;
+    width: 360px;
     text-overflow:ellipsis;
     overflow: hidden;
     white-space: nowrap;

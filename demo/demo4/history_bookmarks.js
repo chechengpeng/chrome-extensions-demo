@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', function () {
   var initPage = 1, last, nums = 25, counts;
   var ele_page;
   var k;
+  var remArr = []; // 选择的想要删除和移动的书签数组
+  var pos = {}; //书签所在的文件夹位置
   var items = document.getElementsByName('url');
   var selectAll = document.getElementById('selectAll'); //全选
   var selectInvert = document.getElementById('selectInvert'); //反选
@@ -23,7 +25,9 @@ document.addEventListener('DOMContentLoaded', function () {
         arr.push({ url: historyItemArray[i].url, title: historyItemArray[i].title });
       }
       chrome.bookmarks.getTree(function (bookmarkArray) {
+        console.log('arryTree:%o',bookmarkArray);
         getAllBookMarksUrl(bookmarkArray);
+        console.log('urlArr--%o',urlArr);
         // 书签中的url在历史记录里找不到
         for (var i = 0; i < urlArr.length; i++) {
           var j = 0;
@@ -68,7 +72,6 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   move.addEventListener('click', function(){
-    var remArr = [];
     for(var i in items){
       if(items.hasOwnProperty(i)){
         if(items[i].checked){
@@ -92,29 +95,11 @@ document.addEventListener('DOMContentLoaded', function () {
               changeShow();
               pageChange();
             }else{
-              var newBookmark = { parentId:'1',title:'不常用',index:0 };
-              chrome.bookmarks.create(newBookmark,function(result){
-                localStorage.newBookmarkId = result.id;
-                for(var m=0;m<remArr.length;m++){
-                  chrome.bookmarks.move(remArr[m].id,{parentId:result.id,index:0});
-                  neverArr.splice(remArr[m].value,1);
-                }
-                changeShow();
-                pageChange();
-              });
+              makeNewBookmark();
             }
           });
         }else {
-          var newBookmark = { parentId:'1',title:'不常用',index:0 };
-          chrome.bookmarks.create(newBookmark,function(result){
-            localStorage.newBookmarkId = result.id;
-            for(var m=0;m<remArr.length;m++){
-              chrome.bookmarks.move(remArr[m].id,{parentId:result.id,index:0});
-              neverArr.splice(remArr[m].value,1);
-            }
-            changeShow();
-            pageChange();
-          });
+          makeNewBookmark();
         }
       }
     }
@@ -148,7 +133,13 @@ document.addEventListener('DOMContentLoaded', function () {
   function getAllBookMarksUrl(arr) {
     for (var i = 0; i < arr.length; i++) {
       if (arr[i].url) {
-        urlArr.push({ url: arr[i].url, title: arr[i].title, id: arr[i].id });
+        urlArr.push({ url: arr[i].url, title: arr[i].title, id: arr[i].id, pos:(pos[arr[i].parentId]).slice(3) });
+      }else{
+        if(pos.hasOwnProperty(arr[i].parentId)){
+          pos[arr[i].id] = pos[arr[i].parentId] +'-->'+ arr[i].title;
+        }else{
+          pos[arr[i].id] = arr[i].title;
+        }
       }
       if (arr[i].children) {
         getAllBookMarksUrl(arr[i].children);
@@ -156,6 +147,19 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  // 新建不常用书签文件夹
+  function makeNewBookmark(){
+    var newBookmark = { parentId:'1',title:'不常用',index:0 };
+    chrome.bookmarks.create(newBookmark,function(result){
+      localStorage.newBookmarkId = result.id;
+      for(var m=0;m<remArr.length;m++){
+        chrome.bookmarks.move(remArr[m].id,{parentId:result.id,index:0});
+        neverArr.splice(remArr[m].value,1);
+      }
+      changeShow();
+      pageChange();
+    });
+  }
   /**
    * 改变页码的时候，列值也变化，并且控制按钮的点击样式
    */
@@ -163,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var text = '';
     for (k = nums * (initPage - 1); k < nums * initPage; k++) {
       if (neverArr[k]) {
-        text = text + '<li><span class="title" title="' + neverArr[k].title + '"><input type="checkbox" name="url" id="' + neverArr[k].id + '" value="' + k + '"><span class="num">' + (k + 1) + '.</span>' + neverArr[k].title + '</span><a class="url" target="_blank" href="' + neverArr[k].url + '" title="' + neverArr[k].url + '">' + neverArr[k].url + '</a></li>';
+        text = text + '<li><a class="title" target="_blank" href="' + neverArr[k].url + '" title="' + neverArr[k].title + '"><input type="checkbox" name="url" id="' + neverArr[k].id + '" value="' + k + '"><span class="num">' + (k + 1) + '.</span>' + neverArr[k].title + '</a><span class="pos" title="' + neverArr[k].pos + '">' + neverArr[k].pos + '</span></li>';
       }
     }
     var actLi = 'li_' + initPage;
