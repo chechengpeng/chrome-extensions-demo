@@ -39,8 +39,6 @@ document.addEventListener('DOMContentLoaded', function () {
             neverArr.push(urlArr[i]);
           }
         }
-        counts = neverArr.length;
-        last = Math.ceil(counts / nums);
         changeShow();
         ele_page.addEventListener('click', pageGo); //ele_page 有内容了再添加事件
         pageChange();
@@ -122,6 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  //全选按钮
   selectAll.addEventListener('click', function () {
     for(var i in items){
       if(items.hasOwnProperty(i)){
@@ -131,6 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   });
 
+  //反选按钮
   selectInvert.addEventListener('click', function () {
     for(var i in items){
       if(items.hasOwnProperty(i)){
@@ -230,6 +230,7 @@ document.addEventListener('DOMContentLoaded', function () {
    * @returns {number}
    */
   function changeShow() {
+    last = Math.ceil(neverArr.length / nums);
     var pageList = '<li id="pre">&lt;</li><li id="li_1" class="active">1</li>';
     if (last < 6) {
       if (last == 1) {
