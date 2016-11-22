@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
       endTime: new Date().getTime(),
       maxResults: 0  //设置为0可以拿到所有的url地址
     }, function (historyItemArray) {
+      console.log('历史记录条数:',historyItemArray);
       for (var i = 0; i < historyItemArray.length; i++) {
         arr.push({ url: historyItemArray[i].url, title: historyItemArray[i].title });
       }
