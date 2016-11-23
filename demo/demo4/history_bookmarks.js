@@ -39,9 +39,15 @@ document.addEventListener('DOMContentLoaded', function () {
             neverArr.push(urlArr[i]);
           }
         }
-        changeShow();
-        ele_page.addEventListener('click', pageGo); //ele_page 有内容了给其注册事件
-        pageChange();
+        //添加无未曾访问情况
+        if(neverArr.length==0){
+          document.getElementById('show').innerHTML = '<h2>没有未曾访问过的书签</h2>';
+          return 0;
+        }else{
+          changeShow();
+          ele_page.addEventListener('click', pageGo); //ele_page 有内容了给其注册事件
+          pageChange();
+        }
       });
     });
   }
