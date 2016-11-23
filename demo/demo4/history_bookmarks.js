@@ -1,34 +1,29 @@
 document.addEventListener('DOMContentLoaded', function () {
-  search();
   var urlArr = []; //书签栏所有书签的的url和title
   var arr = []; //历史记录中所有的url和title
   var neverArr = []; // 书签栏url没有出现在历史记录中的
-  var initPage = 1, last, nums = 25, counts;
-  var ele_page;
-  var k;
+  var initPage = 1, last, nums = 25;// initPage当前页，last总页数，nums每页显示的记录数
+  var ele_page = document.getElementById('page'); // 分页按钮组
   var remArr = []; // 选择的想要删除和移动的书签数组
   var pos = {}; //书签所在的文件夹位置
-  var items = document.getElementsByName('url');
+  var items = document.getElementsByTagName('input');//获取checkbox
   var selectAll = document.getElementById('selectAll'); //全选
   var selectInvert = document.getElementById('selectInvert'); //反选
-  var remove = document.getElementById('remove'); //删除
-  var move = document.getElementById('move'); //删除
-  function search() {
-    ele_page = document.getElementById('page');
+  var remove = document.getElementById('remove'); //删除书签
+  var move = document.getElementById('move'); //移动书签
+  show();//初始化页面显示内容
+  function show() {
     chrome.history.search({
       text: '',
       startTime: 0,
       endTime: new Date().getTime(),
       maxResults: 0  //设置为0可以拿到所有的url地址
     }, function (historyItemArray) {
-      console.log('历史记录条数:',historyItemArray);
       for (var i = 0; i < historyItemArray.length; i++) {
         arr.push({ url: historyItemArray[i].url, title: historyItemArray[i].title });
       }
       chrome.bookmarks.getTree(function (bookmarkArray) {
-        console.log('arryTree:%o',bookmarkArray);
         getAllBookMarksUrl(bookmarkArray);
-        console.log('urlArr--%o',urlArr);
         // 书签中的url在历史记录里找不到
         for (var i = 0; i < urlArr.length; i++) {
           var j = 0;
@@ -39,73 +34,17 @@ document.addEventListener('DOMContentLoaded', function () {
               j++;
             }
           }
-          // 如果遍历完了arr也没找到相等的，就把这条数据添加到数组
+          // 如果遍历完了arr也没找到相等的，说明此书签没有存在在历史记录中，把这条数据添加到数组
           if (j == arr.length) {
             neverArr.push(urlArr[i]);
           }
         }
         changeShow();
-        ele_page.addEventListener('click', pageGo); //ele_page 有内容了再添加事件
+        ele_page.addEventListener('click', pageGo); //ele_page 有内容了给其注册事件
         pageChange();
       });
     });
   }
-
-  remove.addEventListener('click', function () {
-    var remArr = [];
-    for(var i in items){
-      if(items.hasOwnProperty(i)){
-        if(items[i].checked){
-          remArr.push(items[i]);
-        }
-      }
-    }
-    if(remArr.length>0){
-      if (confirm("确定删除吗？")) {
-        for(var m=0;m<remArr.length;m++){
-          chrome.bookmarks.remove(remArr[m].id);
-          neverArr.splice(remArr[m].value,1);
-        }
-        changeShow();
-        pageChange();
-      }
-    }
-  });
-
-  move.addEventListener('click', function(){
-    for(var i in items){
-      if(items.hasOwnProperty(i)){
-        if(items[i].checked){
-          remArr.push(items[i]);
-        }
-      }
-    }
-    console.log(remArr);
-    if(remArr.length>0){
-      if (confirm("确定移到新文件夹吗？")) {
-        var markId = localStorage.newBookmarkId;
-        // 如果存在这个新建文件夹就直接移到此文件夹，否则再新建一个
-        if(markId){
-          // 如果把‘不常用文件夹’删除，但没有清空 localStorage 此处根据id查不到书签,会报错
-          chrome.bookmarks.get(markId,function(result){
-            if(result){
-              for(var m=0;m<remArr.length;m++){
-                chrome.bookmarks.move(remArr[m].id,{parentId:markId,index:0});
-                neverArr.splice(remArr[m].value,1);
-              }
-              changeShow();
-              pageChange();
-            }else{
-              makeNewBookmark();
-            }
-          });
-        }else {
-          makeNewBookmark();
-        }
-      }
-    }
-  });
-
   //全选按钮
   selectAll.addEventListener('click', function () {
     for(var i in items){
@@ -126,10 +65,83 @@ document.addEventListener('DOMContentLoaded', function () {
 
   });
 
+  //删除书签
+  remove.addEventListener('click', function () {
+    for(var i in items){
+      if(items.hasOwnProperty(i)){
+        if(items[i].checked){
+          remArr.push(items[i]);
+        }
+      }
+    }
+    if(remArr.length>0){
+      if (confirm("确定删除吗？")) {
+        for(var m=0;m<remArr.length;m++){
+          chrome.bookmarks.remove(remArr[m].id);
+          removeEle(remArr[m].id);
+        }
+        changeShow();
+        pageChange();
+      }
+    }
+  });
+
+  //移动书签
+  move.addEventListener('click', function(){
+    for(var i in items){
+      if(items.hasOwnProperty(i)){
+        if(items[i].checked){
+          remArr.push(items[i]);
+        }
+      }
+    }
+    console.log(remArr);
+    if(remArr.length>0){
+      if (confirm("确定移到新文件夹吗？")) {
+        var markId = localStorage.newBookmarkId;
+        // 如果存在这个新建文件夹就直接移到此文件夹，否则再新建一个
+        if(pos.hasOwnProperty(markId)){
+          for(var m=0;m<remArr.length;m++){
+            chrome.bookmarks.move(remArr[m].id,{parentId:markId,index:0});
+            removeEle(remArr[m].id);
+          }
+          changeShow();
+          pageChange();
+        }else {
+          makeNewBookmark();
+        }
+      }
+    }
+  });
+
+  // 从neverArr中移除要移动或删除的书签
+  function removeEle(ele){
+    for(var i=0;i<neverArr.length;i++){
+      if(neverArr[i].id == ele){
+        neverArr.splice(i,1);
+        return true;
+      }
+    }
+  }
+
+  // 新建不常用书签文件夹
+  function makeNewBookmark(){
+    var newBookmark = { parentId:'1',title:'不常用',index:0 };
+    chrome.bookmarks.create(newBookmark,function(result){
+      localStorage.newBookmarkId = result.id;
+      pos[result.id] = '-->书签栏-->不常用'; //更新pos对象
+      for(var m=0;m<remArr.length;m++){
+        chrome.bookmarks.move(remArr[m].id,{parentId:result.id,index:0});
+        neverArr.splice(remArr[m].value,1);
+      }
+      changeShow();
+      pageChange();
+    });
+  }
 
   /**
-   * 获取浏览器所有书签的url和title
-   * @param arr 子文件数组
+   * 获取浏览器所有书签的title和所在位置
+   * @param arr 子树
    */
   function getAllBookMarksUrl(arr) {
     for (var i = 0; i < arr.length; i++) {
@@ -148,27 +160,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // 新建不常用书签文件夹
-  function makeNewBookmark(){
-    var newBookmark = { parentId:'1',title:'不常用',index:0 };
-    chrome.bookmarks.create(newBookmark,function(result){
-      localStorage.newBookmarkId = result.id;
-      for(var m=0;m<remArr.length;m++){
-        chrome.bookmarks.move(remArr[m].id,{parentId:result.id,index:0});
-        neverArr.splice(remArr[m].value,1);
-      }
-      changeShow();
-      pageChange();
-    });
-  }
   /**
    * 改变页码的时候，列值也变化，并且控制按钮的点击样式
    */
   function pageChange() {
     var text = '';
-    for (k = nums * (initPage - 1); k < nums * initPage; k++) {
+    for (var k = nums * (initPage - 1); k < nums * initPage; k++) {
       if (neverArr[k]) {
-        text = text + '<li><a class="title" target="_blank" href="' + neverArr[k].url + '" title="' + neverArr[k].title + '"><input type="checkbox" name="url" id="' + neverArr[k].id + '" value="' + k + '"><span class="num">' + (k + 1) + '.</span>' + neverArr[k].title + '</a><span class="pos" title="' + neverArr[k].pos + '">' + neverArr[k].pos + '</span></li>';
+        text = text + '<li><input type="checkbox" name="url" id="' + neverArr[k].id + '" value="' + k + '"><span class="num">' + (k + 1) + '.</span><a class="title" target="_blank" href="' + neverArr[k].url + '" title="' + neverArr[k].title + '">' + neverArr[k].title + '</a><span class="pos" title="' + neverArr[k].pos + '">' + neverArr[k].pos + '</span></li>';
       }
     }
     var actLi = 'li_' + initPage;
@@ -231,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /**
-   * 根据initPage,last的值来确定按钮的显示样式
+   * 根据initPage,last的值来确定分页按钮的显示样式
    * @returns {number}
    */
   function changeShow() {
