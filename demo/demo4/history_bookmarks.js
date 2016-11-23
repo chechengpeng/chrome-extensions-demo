@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var ele_page = document.getElementById('page'); // 分页按钮组
   var remArr = []; // 选择的想要删除和移动的书签数组
   var pos = {}; //书签所在的文件夹位置
-  var items = document.getElementsByTagName('input');//获取checkbox
+  var items = document.getElementsByName('url');//获取checkbox
   var selectAll = document.getElementById('selectAll'); //全选
   var selectInvert = document.getElementById('selectInvert'); //反选
   var remove = document.getElementById('remove'); //删除书签
