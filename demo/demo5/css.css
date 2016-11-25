@@ -1,0 +1,103 @@
+body {font-size: 12px;margin: 0;padding: 0; }
+div,span, ul, li, h1, h2, h3, h4, h5, h6, img, p, dl, dt, dd, ol, th, td {margin: 0;padding: 0;}
+li {list-style-type: none;}
+form, input, button, option, textarea, select {margin: 0;padding: 0;color:#000; }
+textarea{resize:none;}
+input{ outline:none;}
+input, button, textarea, select {font:100% "微软雅黑","华文细黑",STHeiti-Light,STHeiti,"宋体";}
+a {text-decoration: none; cursor:pointer; color: black}
+a:link {text-decoration: none;}
+a:visited {text-decoration: none;}
+a:hover {text-decoration: underline;  }
+a:active {text-decoration: none;}
+body {
+    font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
+    font-size: 100%;
+    width: 1000px;
+    margin: 10px auto;
+}
+ul,ol{
+    margin: 0;
+    padding: 0;
+}
+ol>li{
+    height: 32px;
+    line-height: 32px;
+    width: 100%;
+    padding: 0 5px;
+    display: flex;
+    justify-content: center;
+}
+ol>li:nth-child(even){
+    background-color: #cccccc;
+}
+h2{
+    text-align: center;
+    margin: 10px 0;
+}
+input[type='checkbox']{
+    line-height: 32px;
+    height: 32px;
+    margin-right: 5px;
+}
+.title{
+    display: inline-block;
+    width: 540px;
+    text-overflow:ellipsis;
+    margin-right: 50px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+#show{
+    margin-bottom: 10px;
+}
+.pos{
+    display: inline-block;
+    width: 360px;
+    text-overflow:ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.num{
+    display: inline-block;
+    margin-right: 10px;
+    text-align: right;
+    width: 20px;
+    height: 32px;
+    line-height: 32px;
+}
+#page{
+    margin: 0 auto;
+    text-align: center;
+    user-select:none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+#page li{
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #eeeeee;
+    line-height: 40px;
+    margin-left: -1px; /*双边框调整为单边框 */
+    cursor: pointer;
+}
+#page li:first-child{
+    border-radius: 5px 0 0 5px;
+}
+#page li:last-child{
+    border-radius: 0 5px 5px 0;
+}
+#page li.only{
+    border-radius:5px;
+}
+#page li:hover{
+    background-color: #03d98e;
+}
+#page li.active{
+    background-color: #ED5565 !important;
+}
+#page li.disable:hover{
+    background-color: #cccccc;
+    cursor: not-allowed;
+}

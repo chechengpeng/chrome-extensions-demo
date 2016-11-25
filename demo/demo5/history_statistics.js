@@ -19,36 +19,12 @@ document.addEventListener('DOMContentLoaded', function () {
       endTime: new Date().getTime(),
       maxResults: 0  //设置为0可以拿到所有的url地址
     }, function (historyItemArray) {
-      for (var i = 0; i < historyItemArray.length; i++) {
-        arr.push({ url: historyItemArray[i].url, title: historyItemArray[i].title });
-      }
-      chrome.bookmarks.getTree(function (bookmarkArray) {
-        getAllBookMarksUrl(bookmarkArray);
-        // 书签中的url在历史记录里找不到
-        for (var i = 0; i < urlArr.length; i++) {
-          var j = 0;
-          while (j < arr.length) {
-            if (urlArr[i].url.slice(urlArr[i].url.indexOf(':')) == arr[j].url.slice(arr[j].url.indexOf(':'))) { //解决http变为https
-              break;
-            } else {
-              j++;
-            }
-          }
-          // 如果遍历完了arr也没找到相等的，说明此书签没有存在在历史记录中，把这条数据添加到数组
-          if (j == arr.length) {
-            neverArr.push(urlArr[i]);
-          }
-        }
-        //添加无未曾访问情况
-        if(neverArr.length==0){
-          document.getElementById('show').innerHTML = '<h2>没有未曾访问过的书签</h2>';
-          return 0;
-        }else{
-          changeShow();
-          ele_page.addEventListener('click', pageGo); //ele_page 有内容了给其注册事件
-          pageChange();
-        }
+      historyItemArray.sort(function(a,b){return b.visitCount - a.visitCount;
       });
+      neverArr = historyItemArray;
+      changeShow();
+      ele_page.addEventListener('click', pageGo); //ele_page 有内容了给其注册事件
+      pageChange();
     });
   }
   //全选按钮
@@ -146,34 +122,13 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /**
-   * 获取浏览器所有书签的title和所在位置
-   * @param arr 子树
-   */
-  function getAllBookMarksUrl(arr) {
-    for (var i = 0; i < arr.length; i++) {
-      if (arr[i].url) {
-        urlArr.push({ url: arr[i].url, title: arr[i].title, id: arr[i].id, pos:(pos[arr[i].parentId]).slice(3) });
-      }else{
-        if(pos.hasOwnProperty(arr[i].parentId)){
-          pos[arr[i].id] = pos[arr[i].parentId] +'-->'+ arr[i].title;
-        }else{
-          pos[arr[i].id] = arr[i].title;
-        }
-      }
-      if (arr[i].children) {
-        getAllBookMarksUrl(arr[i].children);
-      }
-    }
-  }
-
-  /**
    * 改变页码的时候，列值也变化，并且控制按钮的点击样式
    */
   function pageChange() {
     var text = '';
     for (var k = nums * (initPage - 1); k < nums * initPage; k++) {
       if (neverArr[k]) {
-        text = text + '<li><input type="checkbox" name="url" id="' + neverArr[k].id + '" value="' + k + '"><span class="num">' + (k + 1) + '.</span><a class="title" target="_blank" href="' + neverArr[k].url + '" title="' + neverArr[k].title + '">' + neverArr[k].title + '</a><span class="pos" title="' + neverArr[k].pos + '">' + neverArr[k].pos + '</span></li>';
+        text = text + '<li><input type="checkbox" name="url" id="' + neverArr[k].id + '" value="' + k + '"><span class="num">' + (k + 1) + '.</span><a class="title" target="_blank" href="' + neverArr[k].url + '" title="' + neverArr[k].title + '">' + neverArr[k].title + '</a><span class="pos" title="' + neverArr[k].visitCount + '">' + neverArr[k].visitCount + '</span></li>';
       }
     }
     var actLi = 'li_' + initPage;

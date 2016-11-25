@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "history and bookmarks",
-  "description": "Show which bookmarks never go",
+  "name": "Sites statistics",
+  "description": "Sites statistics base on history",
   "version": "1.0",
 
   "browser_action": {
