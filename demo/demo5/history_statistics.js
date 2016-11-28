@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var selectAll = document.getElementById('selectAll'); //全选
   var selectInvert = document.getElementById('selectInvert'); //反选
   var remove = document.getElementById('remove'); //删除书签
+  var removeHis = document.getElementById('removeHis'); //删除历史记录
   var move = document.getElementById('move'); //移动书签
   show();//初始化页面显示内容
   function show() {
@@ -19,32 +20,47 @@ document.addEventListener('DOMContentLoaded', function () {
       endTime: new Date().getTime(),
       maxResults: 0  //设置为0可以拿到所有的url地址
     }, function (historyItemArray) {
-      historyItemArray.sort(function(a,b){
-        return b.visitCount - a.visitCount;
-      });
-      neverArr = historyItemArray;
-      //neverArr = historyItemArray.slice(0,20);
-      for(var i=0;i<neverArr.length;i++){
-        neverArr[i].title = neverArr[i].title || '空标题';
-        for(var j=i+1;j<neverArr.length;j++){
-          if(neverArr[i].url.slice(neverArr[i].url.indexOf(':')) == neverArr[j].url.slice(neverArr[j].url.indexOf(':'))){
-            if(neverArr[i].visitCount > neverArr[j].visitCount){ // 消除 http-->https 的影响，选择最大数展示
-              neverArr[j].urlFlag = true;
+
+      chrome.bookmarks.getTree(function (bookmarkArray) {
+        historyItemArray.sort(function(a,b){
+          return b.visitCount - a.visitCount;
+        });
+        getAllBookMarksUrl(bookmarkArray);
+        neverArr = historyItemArray;
+        //neverArr = historyItemArray.slice(0,20);
+        for(var i=0;i<neverArr.length;i++){
+          neverArr[i].title = neverArr[i].title || '（空标题）';
+          // 判断是否收藏并显示其位置
+          for(var m = 0;m < urlArr.length;m++){
+            if(neverArr[i].url.slice(neverArr[i].url.indexOf(':')) == urlArr[m].url.slice(urlArr[m].url.indexOf(':'))){
+              neverArr[i].pos = urlArr[m].pos;
+              break;
+            }else{
+              neverArr[i].pos = '（未收藏）'
+            }
+          }
+          // 消除 http-->https 的影响，选择最大数展示
+          for(var j=i+1;j<neverArr.length;j++){
+            if(neverArr[i].url.slice(neverArr[i].url.indexOf(':')) == neverArr[j].url.slice(neverArr[j].url.indexOf(':'))){
+              if(neverArr[i].visitCount > neverArr[j].visitCount){
+                neverArr[j].urlFlag = true;
+              }
             }
           }
         }
-      }
-      var trueList = [];
-      for(var k=0;k<neverArr.length;k++){
-        if(neverArr[k].urlFlag != true){
-          trueList.push(neverArr[k]);
+        var trueList = [];
+        for(var k=0;k<neverArr.length;k++){
+          if(neverArr[k].urlFlag != true){
+            trueList.push(neverArr[k]);
+          }
         }
-      }
 
-      neverArr = trueList;
-      changeShow();
-      ele_page.addEventListener('click', pageGo); //ele_page 有内容了给其注册事件
-      pageChange();
+        neverArr = trueList;
+        changeShow();
+        ele_page.addEventListener('click', pageGo); //ele_page 有内容了给其注册事件
+        pageChange();
+      });
+
     });
   }
   //全选按钮
@@ -81,6 +97,27 @@ document.addEventListener('DOMContentLoaded', function () {
         for(var m=0;m<remArr.length;m++){
           chrome.bookmarks.remove(remArr[m].id);
           removeEle(remArr[m].id);
+        }
+        changeShow();
+        pageChange();
+      }
+    }
+  });
+  //删除历史记录
+  removeHis.addEventListener('click', function () {
+    for(var i in items){
+      if(items.hasOwnProperty(i)){
+        if(items[i].checked){
+          remArr.push(items[i]);
+        }
+      }
+    }
+    console.log(remArr);
+    if(remArr.length>0){
+      if (confirm("确定删除吗？")) {
+        for(var m=0;m<remArr.length;m++){
+          chrome.history.deleteUrl({url: remArr[m].id});
+          //removeEle(remArr[m].id);
         }
         changeShow();
         pageChange();
@@ -142,13 +179,34 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /**
+   * 获取浏览器所有书签的title和所在位置
+   * @param arr 子树
+   */
+  function getAllBookMarksUrl(arr) {
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].url) {
+        urlArr.push({ url: arr[i].url, title: arr[i].title, id: arr[i].id, pos:(pos[arr[i].parentId]).slice(3) });
+      }else{
+        if(pos.hasOwnProperty(arr[i].parentId)){
+          pos[arr[i].id] = pos[arr[i].parentId] +'-->'+ arr[i].title;
+        }else{
+          pos[arr[i].id] = arr[i].title;
+        }
+      }
+      if (arr[i].children) {
+        getAllBookMarksUrl(arr[i].children);
+      }
+    }
+  }
+  /**
    * 改变页码的时候，列值也变化，并且控制按钮的点击样式
    */
   function pageChange() {
     var text = '';
     for (var k = nums * (initPage - 1); k < nums * initPage; k++) {
       if (neverArr[k]) {
-        text = text + '<li><input type="checkbox" name="url" id="' + neverArr[k].id + '" value="' + k + '"><span class="num">' + (k + 1) + '.</span><a class="title" target="_blank" href="' + neverArr[k].url + '" title="' + neverArr[k].title + '">' + neverArr[k].title + '</a><span class="pos" title="' + neverArr[k].visitCount + '">' + neverArr[k].visitCount + '</span></li>';
+        text = text + '<li><input type="checkbox" name="url" id="' + neverArr[k].url + '" value="' + k + '"><span class="num">' + (k + 1) + '.</span><a class="title title-h" target="_blank" href="' + neverArr[k].url + '" title="' + neverArr[k].title + '">' + neverArr[k].title + '</a>' +
+          '<span class="pos count" title="' + neverArr[k].visitCount + '">' + neverArr[k].visitCount + '</span><span class="pos pos-h" title="' + neverArr[k].pos + '">' + neverArr[k].pos + '</span></li>';
       }
     }
     var actLi = 'li_' + initPage;
