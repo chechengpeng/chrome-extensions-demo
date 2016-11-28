@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var remove = document.getElementById('remove'); //删除书签
   var removeHis = document.getElementById('removeHis'); //删除历史记录
   var move = document.getElementById('move'); //移动书签
+  var moveHis = document.getElementById('moveHis'); //移动历史记录
   show();//初始化页面显示内容
   function show() {
     chrome.history.search({
@@ -85,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   //删除书签
   remove.addEventListener('click', function () {
+    remArr = [];
     for(var i in items){
       if(items.hasOwnProperty(i)){
         if(items[i].checked){
@@ -105,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   //删除历史记录
   removeHis.addEventListener('click', function () {
+    remArr = [];
     for(var i in items){
       if(items.hasOwnProperty(i)){
         if(items[i].checked){
@@ -116,8 +119,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if(remArr.length>0){
       if (confirm("确定删除吗？")) {
         for(var m=0;m<remArr.length;m++){
-          chrome.history.deleteUrl({url: remArr[m].id});
-          //removeEle(remArr[m].id);
+          chrome.history.deleteUrl({url: remArr[m].dataset['url']});
+          removeEle(remArr[m].id);
         }
         changeShow();
         pageChange();
@@ -127,6 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   //移动书签
   move.addEventListener('click', function(){
+    remArr = [];
     for(var i in items){
       if(items.hasOwnProperty(i)){
         if(items[i].checked){
@@ -148,6 +152,53 @@ document.addEventListener('DOMContentLoaded', function () {
           pageChange();
         }else {
           makeNewBookmark();
+        }
+      }
+    }
+  });
+
+  //移动历史记录
+  moveHis.addEventListener('click', function(){
+    remArr = [];//清空
+    for(var i in items){
+      if(items.hasOwnProperty(i)){
+        if(items[i].checked){
+          remArr.push(items[i]);
+        }
+      }
+    }
+    console.log(remArr);
+    if(remArr.length>0){
+      if (confirm("确定添加到常用文件夹吗？")) {
+        var markIdHis = localStorage.newBookmarkIdHis;
+        // 如果存在这个新建文件夹就直接移到此文件夹，否则再新建一个
+        if(pos.hasOwnProperty(markIdHis)){
+          for(var m=0;m<remArr.length;m++){
+            chrome.bookmarks.create({
+              parentId:markIdHis,
+              url: remArr[m].dataset['url'],
+              title: remArr[m].value
+            });
+            removeEle(remArr[m].id);
+          }
+          changeShow();
+          pageChange();
+        }else {
+          var newBookmark = { parentId:'1',title:'常用',index:0 };
+          chrome.bookmarks.create(newBookmark,function(result){
+            localStorage.newBookmarkIdHis = result.id;
+            pos[result.id] = '-->书签栏-->常用'; //更新pos对象
+            for(var m=0;m<remArr.length;m++){
+              chrome.bookmarks.create({
+                parentId:result.id,
+                url: remArr[m].dataset['url'],
+                title: remArr[m].value
+              });
+              removeEle(remArr[m].id);
+            }
+            changeShow();
+            pageChange();
+          });
         }
       }
     }
@@ -205,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var text = '';
     for (var k = nums * (initPage - 1); k < nums * initPage; k++) {
       if (neverArr[k]) {
-        text = text + '<li><input type="checkbox" name="url" id="' + neverArr[k].url + '" value="' + k + '"><span class="num">' + (k + 1) + '.</span><a class="title title-h" target="_blank" href="' + neverArr[k].url + '" title="' + neverArr[k].title + '">' + neverArr[k].title + '</a>' +
+        text = text + '<li><input type="checkbox" name="url" id="' + neverArr[k].id + '" value="' + neverArr[k].title + '" data-url="' + neverArr[k].url + '"><span class="num">' + (k + 1) + '.</span><a class="title title-h" target="_blank" href="' + neverArr[k].url + '" title="' + neverArr[k].title + '">' + neverArr[k].title + '</a>' +
           '<span class="pos count" title="' + neverArr[k].visitCount + '">' + neverArr[k].visitCount + '</span><span class="pos pos-h" title="' + neverArr[k].pos + '">' + neverArr[k].pos + '</span></li>';
       }
     }
