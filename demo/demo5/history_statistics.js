@@ -19,9 +19,29 @@ document.addEventListener('DOMContentLoaded', function () {
       endTime: new Date().getTime(),
       maxResults: 0  //设置为0可以拿到所有的url地址
     }, function (historyItemArray) {
-      historyItemArray.sort(function(a,b){return b.visitCount - a.visitCount;
+      historyItemArray.sort(function(a,b){
+        return b.visitCount - a.visitCount;
       });
       neverArr = historyItemArray;
+      //neverArr = historyItemArray.slice(0,20);
+      for(var i=0;i<neverArr.length;i++){
+        neverArr[i].title = neverArr[i].title || '空标题';
+        for(var j=i+1;j<neverArr.length;j++){
+          if(neverArr[i].url.slice(neverArr[i].url.indexOf(':')) == neverArr[j].url.slice(neverArr[j].url.indexOf(':'))){
+            if(neverArr[i].visitCount > neverArr[j].visitCount){ // 消除 http-->https 的影响，选择最大数展示
+              neverArr[j].urlFlag = true;
+            }
+          }
+        }
+      }
+      var trueList = [];
+      for(var k=0;k<neverArr.length;k++){
+        if(neverArr[k].urlFlag != true){
+          trueList.push(neverArr[k]);
+        }
+      }
+
+      neverArr = trueList;
       changeShow();
       ele_page.addEventListener('click', pageGo); //ele_page 有内容了给其注册事件
       pageChange();
