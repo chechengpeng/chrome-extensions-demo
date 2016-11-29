@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var removeHis = document.getElementById('removeHis'); //删除历史记录
   var move = document.getElementById('move'); //移动书签
   var moveHis = document.getElementById('moveHis'); //移动历史记录
+
   show();//初始化页面显示内容
   function show() {
     chrome.history.search({
@@ -21,49 +22,58 @@ document.addEventListener('DOMContentLoaded', function () {
       endTime: new Date().getTime(),
       maxResults: 0  //设置为0可以拿到所有的url地址
     }, function (historyItemArray) {
-
       chrome.bookmarks.getTree(function (bookmarkArray) {
-        historyItemArray.sort(function(a,b){
-          return b.visitCount - a.visitCount;
-        });
-        getAllBookMarksUrl(bookmarkArray);
-        neverArr = historyItemArray;
-        //neverArr = historyItemArray.slice(0,20);
-        for(var i=0;i<neverArr.length;i++){
-          neverArr[i].title = neverArr[i].title || '（空标题）';
-          // 判断是否收藏并显示其位置
-          for(var m = 0;m < urlArr.length;m++){
-            if(neverArr[i].url.slice(neverArr[i].url.indexOf(':')) == urlArr[m].url.slice(urlArr[m].url.indexOf(':'))){
-              neverArr[i].pos = urlArr[m].pos;
-              break;
-            }else{
-              neverArr[i].pos = '（未收藏）'
-            }
-          }
-          // 消除 http-->https 的影响，选择最大数展示
-          for(var j=i+1;j<neverArr.length;j++){
-            if(neverArr[i].url.slice(neverArr[i].url.indexOf(':')) == neverArr[j].url.slice(neverArr[j].url.indexOf(':'))){
-              if(neverArr[i].visitCount > neverArr[j].visitCount){
-                neverArr[j].urlFlag = true;
-              }
-            }
-          }
-        }
-        var trueList = [];
-        for(var k=0;k<neverArr.length;k++){
-          if(neverArr[k].urlFlag != true){
-            trueList.push(neverArr[k]);
-          }
-        }
-
-        neverArr = trueList;
+        doHisStat(historyItemArray,bookmarkArray);
         changeShow();
         ele_page.addEventListener('click', pageGo); //ele_page 有内容了给其注册事件
         pageChange();
+
       });
 
     });
   }
+  function doHisStat(historyItemArray,bookmarkArray){
+    historyItemArray.sort(function(a,b){
+      return b.visitCount - a.visitCount;
+    });
+    getAllBookMarksUrl(bookmarkArray);
+    neverArr = historyItemArray;
+    console.time('for');
+    for(var i=0;i<neverArr.length;i++){
+      neverArr[i].title = neverArr[i].title || '（空标题）';
+      // 判断是否收藏并显示其位置
+      for(var m = 0;m < urlArr.length;m++){
+        if(sliceUrl(neverArr[i].url) == sliceUrl(urlArr[m].url)){
+          neverArr[i].pos = urlArr[m].pos;
+          break;
+        }else{
+          neverArr[i].pos = '（未收藏）'
+        }
+      }
+      // 有的有两个统计项一个为http，一个为https，选择最大数展示
+      for(var j=i+1;j<neverArr.length;j++){
+        if(sliceUrl(neverArr[i].url) == sliceUrl(neverArr[j].url)){
+          if(neverArr[i].visitCount > neverArr[j].visitCount){
+            neverArr[j].urlFlag = true;
+          }
+          break;
+        }
+      }
+    }
+    var trueList = [];
+    for(var k=0;k<neverArr.length;k++){
+      if(neverArr[k].urlFlag != true){
+        trueList.push(neverArr[k]);
+      }
+    }
+    console.timeEnd('for');
+    neverArr = trueList;
+  }
+  // 忽略http:和https:的区别
+  function sliceUrl(url){
+    return url.slice(url.indexOf(':'));
+  }
+
   //全选按钮
   selectAll.addEventListener('click', function () {
     for(var i in items){
