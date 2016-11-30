@@ -2,16 +2,14 @@ document.addEventListener('DOMContentLoaded', function () {
   var urlArr = []; //书签栏所有书签的的url和title
   var arr = []; //历史记录中所有的url和title
   var neverArr = []; // 书签栏url没有出现在历史记录中的
-  var initPage = 1, last, nums = 25;// initPage当前页，last总页数，nums每页显示的记录数
+  var initPage = 1, last, nums = 20;// initPage当前页，last总页数，nums每页显示的记录数
   var ele_page = document.getElementById('page'); // 分页按钮组
   var remArr = []; // 选择的想要删除和移动的书签数组
   var pos = {}; //书签所在的文件夹位置
   var items = document.getElementsByName('url');//获取checkbox
   var selectAll = document.getElementById('selectAll'); //全选
   var selectInvert = document.getElementById('selectInvert'); //反选
-  var remove = document.getElementById('remove'); //删除书签
   var removeHis = document.getElementById('removeHis'); //删除历史记录
-  var move = document.getElementById('move'); //移动书签
   var moveHis = document.getElementById('moveHis'); //移动历史记录
 
   show();//初始化页面显示内容
@@ -94,27 +92,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   });
 
-  //删除书签
-  remove.addEventListener('click', function () {
-    remArr = [];
-    for(var i in items){
-      if(items.hasOwnProperty(i)){
-        if(items[i].checked){
-          remArr.push(items[i]);
-        }
-      }
-    }
-    if(remArr.length>0){
-      if (confirm("确定删除吗？")) {
-        for(var m=0;m<remArr.length;m++){
-          chrome.bookmarks.remove(remArr[m].id);
-          removeEle(remArr[m].id);
-        }
-        changeShow();
-        pageChange();
-      }
-    }
-  });
   //删除历史记录
   removeHis.addEventListener('click', function () {
     remArr = [];
@@ -134,35 +111,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         changeShow();
         pageChange();
-      }
-    }
-  });
-
-  //移动书签
-  move.addEventListener('click', function(){
-    remArr = [];
-    for(var i in items){
-      if(items.hasOwnProperty(i)){
-        if(items[i].checked){
-          remArr.push(items[i]);
-        }
-      }
-    }
-    console.log(remArr);
-    if(remArr.length>0){
-      if (confirm("确定移到新文件夹吗？")) {
-        var markId = localStorage.newBookmarkId;
-        // 如果存在这个新建文件夹就直接移到此文件夹，否则再新建一个
-        if(pos.hasOwnProperty(markId)){
-          for(var m=0;m<remArr.length;m++){
-            chrome.bookmarks.move(remArr[m].id,{parentId:markId,index:0});
-            removeEle(remArr[m].id);
-          }
-          changeShow();
-          pageChange();
-        }else {
-          makeNewBookmark();
-        }
       }
     }
   });
@@ -224,21 +172,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // 新建不常用书签文件夹
-  function makeNewBookmark(){
-    var newBookmark = { parentId:'1',title:'不常用',index:0 };
-    chrome.bookmarks.create(newBookmark,function(result){
-      localStorage.newBookmarkId = result.id;
-      pos[result.id] = '-->书签栏-->不常用'; //更新pos对象
-      for(var m=0;m<remArr.length;m++){
-        chrome.bookmarks.move(remArr[m].id,{parentId:result.id,index:0});
-        neverArr.splice(remArr[m].value,1);
-      }
-      changeShow();
-      pageChange();
-    });
-  }
-
   /**
    * 获取浏览器所有书签的title和所在位置
    * @param arr 子树
@@ -263,11 +196,13 @@ document.addEventListener('DOMContentLoaded', function () {
    * 改变页码的时候，列值也变化，并且控制按钮的点击样式
    */
   function pageChange() {
-    var text = '';
+    var text = '<tr><th>序号</th><th>网站名称</th><th>访问次数</th><th>书签所在位置</th></tr>';
     for (var k = nums * (initPage - 1); k < nums * initPage; k++) {
       if (neverArr[k]) {
-        text = text + '<li><input type="checkbox" name="url" id="' + neverArr[k].id + '" value="' + neverArr[k].title + '" data-url="' + neverArr[k].url + '"><span class="num">' + (k + 1) + '.</span><a class="title title-h" target="_blank" href="' + neverArr[k].url + '" title="' + neverArr[k].title + '">' + neverArr[k].title + '</a>' +
-          '<span class="pos count" title="' + neverArr[k].visitCount + '">' + neverArr[k].visitCount + '</span><span class="pos pos-h" title="' + neverArr[k].pos + '">' + neverArr[k].pos + '</span></li>';
+        text = text + '<tr><td><input type="checkbox" name="url" id="' + neverArr[k].id + '" value="' + neverArr[k].title + '" data-url="' + neverArr[k].url + '">' + (k + 1) + '.</td>' +
+          '<td><a class="title title-h" target="_blank" href="' + neverArr[k].url + '" title="' + neverArr[k].title + '">' + neverArr[k].title + '</a></td>' +
+          '<td><span class="pos count" title="' + neverArr[k].visitCount + '">' + neverArr[k].visitCount + '</span></td>' +
+          '<td><span class="pos pos-h" title="' + neverArr[k].pos + '">' + neverArr[k].pos + '</span></td></tr>';
       }
     }
     var actLi = 'li_' + initPage;

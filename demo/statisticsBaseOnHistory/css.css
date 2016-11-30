@@ -1,24 +1,6 @@
-body {font-size: 12px;margin: 0;padding: 0; }
-div,span, ul, li, h1, h2, h3, h4, h5, h6, img, p, dl, dt, dd, ol, th, td {margin: 0;padding: 0;}
-li {list-style-type: none;}
-form, input, button, option, textarea, select {margin: 0;padding: 0;color:#000; }
-textarea{resize:none;}
-input{ outline:none;}
-input, button, textarea, select {font:100% "微软雅黑","华文细黑",STHeiti-Light,STHeiti,"宋体";}
-a {text-decoration: none; cursor:pointer; color: black}
-a:link {text-decoration: none;}
-a:visited {text-decoration: none;}
-a:hover {text-decoration: underline;  }
-a:active {text-decoration: none;}
 body {
-    font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
-    font-size: 100%;
     width: 1000px;
     margin: 10px auto;
-}
-ul,ol{
-    margin: 0;
-    padding: 0;
 }
 ol>li{
     height: 32px;
@@ -33,15 +15,17 @@ ol>li:nth-child(even){
 }
 h2{
     text-align: center;
-    margin: 10px 0;
+    margin: 15px 0 10px 0;
+    font-size: 24px;
+}
+.group{
+    margin-bottom: 15px;
 }
 input[type='checkbox']{
-    line-height: 32px;
-    height: 32px;
     margin-right: 5px;
 }
 .title{
-    display: inline-block;
+    display: block;
     width: 540px;
     text-overflow:ellipsis;
     margin-right: 50px;
@@ -55,7 +39,7 @@ input[type='checkbox']{
     margin-bottom: 10px;
 }
 .pos{
-    display: inline-block;
+    display: block;
     width: 360px;
     text-overflow:ellipsis;
     overflow: hidden;

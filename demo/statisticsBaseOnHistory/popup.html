@@ -5,35 +5,37 @@
  value "popup.html".
  -->
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>sites statistics</title>
-    <link href="css.css" rel="stylesheet">
-    <!--
-      - JavaScript and HTML must be in separate files: see our Content Security
-      - Policy documentation[1] for details and explanation.
-      -
-      - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
-     -->
-    <script src="history_statistics.js"></script>
-  </head>
-  <body>
-    <h2>基于历史记录的访问统计</h2>
-    <div>
-      <div>
-        <button id="selectAll">全选</button>
-        <button id="selectInvert">反选</button>
-        <button id="remove">删除书签</button>
-        <button id="removeHis">删除历史记录</button>
-        <button id="move">一键转移到不常用</button>
-        <button id="moveHis">一键添加到常用</button>
-      </div>
-      <hr>
-      <ol id="show"></ol>
-    </div>
-    <ul id="page">
+<head>
+  <meta charset="UTF-8">
+  <title>sites statistics</title>
+  <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+  <link href="css.css" rel="stylesheet">
+  <!--
+    - JavaScript and HTML must be in separate files: see our Content Security
+    - Policy documentation[1] for details and explanation.
+    -
+    - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
+   -->
+  <script src="history_statistics.js"></script>
+</head>
+<body>
+<h2>基于历史记录的访问统计</h2>
+<div class="group">
+  <button class="btn btn-sm btn-default" id="selectAll">全选</button>
+  <button class="btn btn-sm btn-default" id="selectInvert">反选</button>
+  <button class="btn btn-sm btn-danger" id="removeHis">删除历史记录</button>
+  <button class="btn btn-sm btn-warning" id="moveHis">一键添加到常用</button>
+</div>
 
-    </ul>
-  </body>
+<div class="table-responsive">
+  <table id="show" class="table table-striped table-condensed">
+
+
+  </table>
+</div>
+<ul id="page">
+
+</ul>
+</body>
 </html>
 
