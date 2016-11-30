@@ -5,33 +5,40 @@
  value "popup.html".
  -->
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Getting Started Extension's Popup</title>
-    <link href="css.css" rel="stylesheet">
-    <!--
-      - JavaScript and HTML must be in separate files: see our Content Security
-      - Policy documentation[1] for details and explanation.
-      -
-      - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
-     -->
-    <script src="history_bookmarks.js"></script>
-  </head>
-  <body>
-    <h2>不常用的书签（已有的历史记录中没找到这些书签）</h2>
-    <div>
-      <div>
-        <button id="selectAll">全选</button>
-        <button id="selectInvert">反选</button>
-        <button id="remove">删除书签</button>
-        <button id="move">一键转移到不常用</button>
-      </div>
-      <hr>
-      <ol id="show"></ol>
-    </div>
-    <ul id="page">
+<head>
+  <meta charset="UTF-8">
+  <title>Getting Started Extension's Popup</title>
+  <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+  <link href="css.css" rel="stylesheet">
+  <!--
+    - JavaScript and HTML must be in separate files: see our Content Security
+    - Policy documentation[1] for details and explanation.
+    -
+    - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
+   -->
+  <script src="history_bookmarks.js"></script>
+</head>
+<body>
+<h2>不常用的书签</h2>
 
-    </ul>
-  </body>
+<p>意为从浏览器保存的历史记录中没找到这些书签，如果有经常性清除历史记录的习惯，请忽视</p>
+
+<div class="group">
+  <button class="btn btn-sm btn-default" id="selectAll">全选</button>
+  <button class="btn btn-sm btn-default" id="selectInvert">反选</button>
+  <button class="btn btn-sm btn-danger" id="remove">删除书签</button>
+  <button class="btn btn-sm btn-warning" id="move">一键转移到不常用</button>
+</div>
+<div class="table-responsive">
+  <table id="show" class="table table-striped table-condensed">
+
+
+  </table>
+</div>
+
+<ul id="page">
+
+</ul>
+</body>
 </html>
 

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var urlArr = []; //书签栏所有书签的的url和title
   var arr = []; //历史记录中所有的url和title
   var neverArr = []; // 书签栏url没有出现在历史记录中的
-  var initPage = 1, last, nums = 25;// initPage当前页，last总页数，nums每页显示的记录数
+  var initPage = 1, last, nums = 20;// initPage当前页，last总页数，nums每页显示的记录数
   var ele_page = document.getElementById('page'); // 分页按钮组
   var remArr = []; // 选择的想要删除和移动的书签数组
   var pos = {}; //书签所在的文件夹位置
@@ -170,10 +170,12 @@ document.addEventListener('DOMContentLoaded', function () {
    * 改变页码的时候，列值也变化，并且控制按钮的点击样式
    */
   function pageChange() {
-    var text = '';
+    var text = '<tr><th colspan="2">序号</th><th>书签名</th> <th>所在位置</th></tr>';
     for (var k = nums * (initPage - 1); k < nums * initPage; k++) {
       if (neverArr[k]) {
-        text = text + '<li><input type="checkbox" name="url" id="' + neverArr[k].id + '" value="' + k + '"><span class="num">' + (k + 1) + '.</span><a class="title" target="_blank" href="' + neverArr[k].url + '" title="' + neverArr[k].title + '">' + neverArr[k].title + '</a><span class="pos" title="' + neverArr[k].pos + '">' + neverArr[k].pos + '</span></li>';
+        text = text + '<tr><td><input type="checkbox" name="url" id="' + neverArr[k].id + '" value="' + k + '"></td><td>' + (k + 1) + '.</td>' +
+          '<td><a class="title" target="_blank" href="' + neverArr[k].url + '" title="' + neverArr[k].title + '">' + neverArr[k].title + '</a></td>' +
+          '<td><span class="pos" title="' + neverArr[k].pos + '">' + neverArr[k].pos + '</span></td></tr>';
       }
     }
     var actLi = 'li_' + initPage;
